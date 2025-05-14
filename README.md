@@ -36,6 +36,7 @@ The GPU implementation provides a 400x speedup over the CPU version, demonstrati
 The bloom behaves as expected in various test cases, with realistic glow shapes around bright regions. Multiple kernel sizes and shapes were tested, showcasing the flexibility of the approach.
 
 <p align="center"><i>(Example images omitted here—see the "Results" section in the project report or screenshots folder (will add later).)</i></p>
+
 ## Dependencies
 Python 3.8+
 
