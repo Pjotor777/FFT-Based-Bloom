@@ -18,11 +18,14 @@ import cProfile
 import pstats
 import io
 from IPython import display
-
-
+# ================================================================================================
+# This file is the interactive visualization interface for the bloom effect. 
+# It includes sliders that allow users to experiment with bloom settings in real time.
+# ================================================================================================
+# Sets up a GPU context using PyOpenCL. Searches for a GPU if not already specified via PYOPENCL_CTX.
 if 'PYOPENCL_CTX' in os.environ:
     ctx = cl.create_some_context()
-else:
+else:  # manually searches for a GPU device.
     ctx = None
     for p in cl.get_platforms():
         for d in p.get_devices():
@@ -37,17 +40,25 @@ cq = cl.CommandQueue(ctx)
 
 
 def convolve_fft(image, kernel):
+    # Ensure image and kernel are 3D (H x W x C) for consistent channel processing
     if image.ndim == 2:
         image = np.expand_dims(image, axis=2)
     if kernel.ndim == 2:
         kernel = np.expand_dims(kernel, axis=2)
     
+    # Prepare empty result array
     result = np.zeros_like(image, dtype=float)
-    print(image.shape)
+    print(image.shape)  # Debug: confirm shape
+    
+    # Convolve each color channel independently
     for i in range(image.shape[2]):
         result[:,:,i] = convolve_fft_single_channel(image[:,:,i], kernel[:,:,i])
+    
+    # Normalize output to range [0, 1] with stability offset
     result = (result - result.min()) / (0.1 + result.max() - result.min())
+    
     return result
+
 
 def convolve_fft_single_channel(image, kernel):
     image = image.astype(np.complex64)
@@ -113,15 +124,6 @@ def update(val):
         ax3.imshow(compshow/2+main_image)
         i += 1
  
-        
-        
-
-    
-    
-    
-
-    
- 
 
 main_image = np.array(Image.open('TestImage1.jpg'))
 main_image = main_image / 255
@@ -135,10 +137,8 @@ plt.subplots_adjust(bottom=0.50)
 ax2.set_title('Move sliders to run (might take awhile)')
 
 
-
 axTint = plt.axes([0.25, 0.3, 0.65, 0.03]) 
 scaletint_slider = Slider(axTint, 'Tint', 0, 1, valinit=0.95, valstep=0.01)
-
 
 axthres = plt.axes([0.25, 0.25, 0.65, 0.03]) 
 thres_slider = Slider(axthres, 'Threshold', 0.0, 1, valinit=0.95, valstep=0.01)
@@ -151,8 +151,6 @@ gamma_slider2 = Slider(axgamma2, 'Gamma Image', 0, 20, valinit=1, valstep=0.1)
 
 axSpacing = plt.axes([0.25, 0.4, 0.65, 0.03]) 
 Spacing_slider = Slider(axSpacing, 'Kernel scaling', 0.5, 4, valinit=20, valstep=0.1)
-
-
 
 axrot= plt.axes([0.25, 0.15, 0.65, 0.03]) 
 rot_slider = Slider(axrot, 'Rotation', 0, 20, valinit=0, valstep=0.1)
@@ -172,9 +170,4 @@ rot_slider.on_changed(update)
 decay_slider.on_changed(update)
 kernel_lim_slider.on_changed(update)
 
-
-
-
 plt.show()
-
-
