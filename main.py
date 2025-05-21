@@ -36,15 +36,15 @@ else:  # manually searches for a GPU device.
             break
         if ctx is not None:
             break
-cq = cl.CommandQueue(ctx)
+cq = cl.CommandQueue(ctx) # Creates a command queue for the context.
 
 
 def convolve_fft(image, kernel):
     # Ensure image and kernel are 3D (H x W x C) for consistent channel processing
     if image.ndim == 2:
-        image = np.expand_dims(image, axis=2)
+        image = np.expand_dims(image, axis=2) 
     if kernel.ndim == 2:
-        kernel = np.expand_dims(kernel, axis=2)
+        kernel = np.expand_dims(kernel, axis=2) 
     
     # Prepare empty result array
     result = np.zeros_like(image, dtype=float)
@@ -55,27 +55,39 @@ def convolve_fft(image, kernel):
         result[:,:,i] = convolve_fft_single_channel(image[:,:,i], kernel[:,:,i])
     
     # Normalize output to range [0, 1] with stability offset
+    # normalization ensures the output remains visually meaningful, as
+    # the convolution can produce values outside the [0, 1] or 0, 255 range.
     result = (result - result.min()) / (0.1 + result.max() - result.min())
     
     return result
+# end convolve_fft
 
 
 def convolve_fft_single_channel(image, kernel):
-    image = image.astype(np.complex64)
-    kernel = kernel.astype(np.complex64)
+    # Efficiently convolve a 2D image with a 2D kernel using the convolution theorem
+    # Convert image and kernal to complex type for FFT
+    image = image.astype(np.complex64) 
+    kernel = kernel.astype(np.complex64) 
     
+    # Pad the kernel to same shape as image
     padded_kernel = np.zeros_like(image)
-    kh, kw = kernel.shape
-    padded_kernel[:kh, :kw] = kernel
+    kh, kw = kernel.shape # Get kernel dimensions
+    # Inserts the smaller kernel into the top-left corner (needed for element-wise FFT)
+    padded_kernel[:kh, :kw] = kernel 
     
+    # Re-centers the kernel around the origin.
+    # FFT assumes that the kernel’s center is at (0, 0) in the spatial domain -> corresponding to low-frequency components.
+    # This ensures kernel is spatially aligned for convolution instead of correlation
     padded_kernel = np.roll(padded_kernel, (-kh // 2, -kw // 2), axis=(0, 1))
      
+    #Upload to GPU and perform FFT
     fft_image =  vkfftn(cla.to_device(cq,image))
     fft_kernel =  vkfftn(cla.to_device(cq,padded_kernel))
-    fft_result = fft_image * fft_kernel
+    fft_result = fft_image * fft_kernel # Multiply in frequency domain
     result = (vkifftn(fft_result).get()).real
     
     return result
+# end convolve_fft_single_channel
 
 def update(val):
     
@@ -123,7 +135,7 @@ def update(val):
         ax1.imshow(mask.astype(np.float32))
         ax3.imshow(compshow/2+main_image)
         i += 1
- 
+# end update
 
 main_image = np.array(Image.open('TestImage1.jpg'))
 main_image = main_image / 255
