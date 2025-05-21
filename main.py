@@ -152,9 +152,12 @@ def update(val): # responsible for the gui: updating the image based on slider v
         i += 1 # increment kernel scale
 # end update
 
-main_image = np.array(Image.open('TestImage1.jpg'))
-main_image = main_image / 255
+# Load and normalize the main image (input image for bloom effect)
+main_image = np.array(Image.open('TestImage1.jpg')) # Load image from disk
+main_image = main_image / 255 # Normalize pixel values to [0, 1] range
+# Downscale the image to reduce computation (zoom by 40%)
 main_image = ndimage.zoom(main_image, (.4, .4, 1), order=0)
+
 lum = (0.299*main_image[:,:,0] + 0.587*main_image[:,:,0]  + 0.114*main_image[:,:,0] )
 lum = np.stack([lum]*3, axis=-1)
 kernel_image_full = np.array(Image.open('kernel7.jpg'))
