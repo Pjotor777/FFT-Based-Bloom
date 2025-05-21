@@ -125,13 +125,21 @@ def update(val): # responsible for the gui: updating the image based on slider v
     size_const1 = (0,0) # Initialize size_const1 to enter the loop
     # iterate until klim_v exceeds kernel size
     while (size_const1 < size_const2):
+        # rotates the kernel image by a factor of i*i*rot_v
         kernel_image_rot = ndimage.rotate(kernel_image_full,i*i*rot_v,reshape=False)
+        # scales the kernel image by a factor of i*i*spacing_v
         kernel_image = np.array(ndimage.zoom(kernel_image_rot, (spacing_v*0.01*i**2, spacing_v*0.01*i**2, 1), order=0),dtype=np.float32)
+
+        # Apply progressive color attenuation
+        # As i increases, each channel's intensity fades, preventing distant kernals 
+        # from overcontributing/over saturating colors
         kernel_image[:,:,0] /= 1+i*R_v
         kernel_image[:,:,1] /= 1+i*G_v
         kernel_image[:,:,2] /= 1+i*B_v
+
+        # Apply gamma correction to the kernel image
         size_const1 = kernel_image.shape
-        mask = (lum**gamma_v>thres_v)
+        mask = (lum**gamma_v>thres_v) # brightness masking
         convolved_image = convolve_fft((main_image**gamma_v2)*mask, kernel_image)*(0.5*i**decay_v)
         comp += convolved_image
         compshow = np.sign(comp) * (np.abs(comp)) **(0.01+1/gamma_v2)
