@@ -139,14 +139,17 @@ def update(val): # responsible for the gui: updating the image based on slider v
 
         # Apply gamma correction to the kernel image
         size_const1 = kernel_image.shape
-        mask = (lum**gamma_v>thres_v) # brightness masking
+        mask = (lum**gamma_v>thres_v) # brightness masking. more gamma = narrower selection of bright spots
+        # Apply FFT convolution
+        # The kernel image is convolved with the main image, and the result is scaled by the decay factor
         convolved_image = convolve_fft((main_image**gamma_v2)*mask, kernel_image)*(0.5*i**decay_v)
-        comp += convolved_image
-        compshow = np.sign(comp) * (np.abs(comp)) **(0.01+1/gamma_v2)
+        comp += convolved_image # accumulate the convolution results
+        compshow = np.sign(comp) * (np.abs(comp)) **(0.01+1/gamma_v2) # Apply nonlinear tone mapping to compress contrast
 
+        # Update plots
         ax1.imshow(mask.astype(np.float32))
         ax3.imshow(compshow/2+main_image)
-        i += 1
+        i += 1 # increment kernel scale
 # end update
 
 main_image = np.array(Image.open('TestImage1.jpg'))
