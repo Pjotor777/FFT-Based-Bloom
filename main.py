@@ -22,7 +22,7 @@ from IPython import display
 # This file is the interactive visualization interface for the bloom effect. 
 # It includes sliders that allow users to experiment with bloom settings in real time.
 # ================================================================================================
-# Sets up a GPU context using PyOpenCL. Searches for a GPU if not already specified via PYOPENCL_CTX.
+# Sets up a GPU context using PyOpenCL. Searches for a GPU if not already specified via PYOPENCL_CTX
 if 'PYOPENCL_CTX' in os.environ:
     ctx = cl.create_some_context()
 else:  # manually searches for a GPU device.
@@ -36,7 +36,7 @@ else:  # manually searches for a GPU device.
             break
         if ctx is not None:
             break
-cq = cl.CommandQueue(ctx) # Creates a command queue for the context.
+cq = cl.CommandQueue(ctx) # Creates a command queue for the context
 
 
 def convolve_fft(image, kernel):
@@ -56,7 +56,7 @@ def convolve_fft(image, kernel):
     
     # Normalize output to range [0, 1] with stability offset
     # normalization ensures the output remains visually meaningful, as
-    # the convolution can produce values outside the [0, 1] or 0, 255 range.
+    # the convolution can produce values outside the [0, 1] or 0, 255 range
     result = (result - result.min()) / (0.1 + result.max() - result.min())
     
     return result
@@ -76,7 +76,7 @@ def convolve_fft_single_channel(image, kernel):
     padded_kernel[:kh, :kw] = kernel 
     
     # Re-centers the kernel around the origin.
-    # FFT assumes that the kernel’s center is at (0, 0) in the spatial domain -> corresponding to low-frequency components.
+    # FFT assumes that the kernel’s center is at (0, 0) in the spatial domain -> corresponding to low-frequency components
     # This ensures kernel is spatially aligned for convolution instead of correlation
     padded_kernel = np.roll(padded_kernel, (-kh // 2, -kw // 2), axis=(0, 1))
      
@@ -89,18 +89,18 @@ def convolve_fft_single_channel(image, kernel):
     return result
 # end convolve_fft_single_channel
 
-def update(val):
+def update(val): # responsible for the gui: updating the image based on slider values
     
-    gamma_v = gamma_slider.val
-    gamma_v2 = gamma_slider2.val
-    rot_v = rot_slider.val
-    decay_v = decay_slider.val
-    klim_v = kernel_lim_slider.val
-    thres_v = thres_slider.val
-    scaletint_v = scaletint_slider.val
-    spacing_v = Spacing_slider.val
+    gamma_v = gamma_slider.val         # Gamma for the mask (affects which pixels are "bright enough")
+    gamma_v2 = gamma_slider2.val       # Gamma applied to the image itself before convolution
+    rot_v = rot_slider.val             # Rotation multiplier for kernel
+    decay_v = decay_slider.val         # Controls how much each kernel scale contributes
+    klim_v = kernel_lim_slider.val     # Upper limit on kernel size
+    thres_v = thres_slider.val         # Brightness threshold
+    scaletint_v = scaletint_slider.val # Overall strength of color tint
+    spacing_v = Spacing_slider.val     # Kernel scale spacing multiplier
 
-    
+    # Axis labels
     ax1.imshow(main_image)
     ax1.set_title('Mask')
     ax1.axis('off')
@@ -108,18 +108,22 @@ def update(val):
     ax2.set_title('Original Kernel Image')
     ax2.axis('off')
 
-    compshow = np.zeros_like(main_image)
+    compshow = np.zeros_like(main_image) # Initialize the composite image
 
+    # Controls how much each RGB channel fades as the kernel scales grow
+    # Gives the bloom effect a color-tinted fading effect
     R_v = 0.8*scaletint_v
     G_v = 0.4*scaletint_v
     B_v = 0.1*scaletint_v
     
 
-
+    # Termination condition for while loop
     comp = np.zeros(np.shape(main_image))
+    # klim_v sets a limit on kernel size, thenthe loop exits when the next scaled kernel exceeds this limit
     size_const2 = (main_image.shape[0]/klim_v**1.5,main_image.shape[1]/klim_v**1.5)
-    i = 0
-    size_const1 = (0,0)
+    i = 0 # index controlling kernel scale, rotation and decay
+    size_const1 = (0,0) # Initialize size_const1 to enter the loop
+    # iterate until klim_v exceeds kernel size
     while (size_const1 < size_const2):
         kernel_image_rot = ndimage.rotate(kernel_image_full,i*i*rot_v,reshape=False)
         kernel_image = np.array(ndimage.zoom(kernel_image_rot, (spacing_v*0.01*i**2, spacing_v*0.01*i**2, 1), order=0),dtype=np.float32)
