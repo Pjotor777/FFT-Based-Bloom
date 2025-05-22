@@ -14,7 +14,7 @@ Brightness Masking: Supports threshold-based and gamma-based brightness selectio
 
 Interactive Controls: GUI with sliders to adjust brightness threshold, gamma correction, kernel scaling, and blend intensity.
 
-Will add CUDA-based GUI version soon
+Will add CUDA-based GUI version soon.
 
 ## How It Works
 Brightness Filtering: Bright parts of the image are selected based on a dynamic threshold or nonlinear gamma masking.
