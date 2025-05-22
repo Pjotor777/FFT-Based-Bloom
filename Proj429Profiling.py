@@ -18,7 +18,10 @@ import cProfile
 import pstats
 import io
 from IPython import display
-
+# ================================================================================================
+# This file is the non-interactive visualization interface for the bloom effect. 
+# ================================================================================================
+# Sets up a GPU context using PyOpenCL. Searches for a GPU if not already specified via PYOPENCL_CTX
 if 'PYOPENCL_CTX' in os.environ:
     ctx = cl.create_some_context()
 else:
