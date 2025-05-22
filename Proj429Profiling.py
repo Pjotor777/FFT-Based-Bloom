@@ -1,4 +1,4 @@
-
+# Import necessary libraries
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import fftpack, ndimage,signal
@@ -18,10 +18,6 @@ import cProfile
 import pstats
 import io
 from IPython import display
-
-
-
-
 
 if 'PYOPENCL_CTX' in os.environ:
     ctx = cl.create_some_context()
@@ -51,6 +47,7 @@ def convolve_fft(image, kernel):
         result[:,:,i] = convolve_fft_single_channel(image[:,:,i], kernel[:,:,i])
     result = (result - result.min()) / (0.1 + result.max() - result.min())
     return result
+# end convolve_fft
 
 def convolve_fft_single_channel(image, kernel):
     image = image.astype(np.complex64)
@@ -68,7 +65,7 @@ def convolve_fft_single_channel(image, kernel):
     result = (vkifftn(fft_result).get()).real
     
     return result
-
+# end convolve_fft_single_channel
 
 def convolve_fft_single_channel_NUMPYVERSION(image, kernel):
     image = image.astype(float)
@@ -88,9 +85,7 @@ def convolve_fft_single_channel_NUMPYVERSION(image, kernel):
     result = fftpack.ifft2(fft_result).real
     
     return result
-
-
-
+# end convolve_fft_single_channel_NUMPYVERSION
 
 main_image = np.array(Image.open('TestImage1.jpg'))
 main_image = main_image / 255
@@ -98,9 +93,6 @@ main_image = ndimage.zoom(main_image, (0.3, 0.3, 1), order=0)
 lum = (0.299*main_image[:,:,0] + 0.587*main_image[:,:,0]  + 0.114*main_image[:,:,0] )
 lum = np.stack([lum]*3, axis=-1)
 kernel_image_full = np.array(Image.open('kernel7.jpg'))
-
-
-
 
 gamma_v = 1
 gamma_v2 = 1
@@ -110,9 +102,6 @@ klim_v = 2
 thres_v = 1
 scaletint_v = 1
 spacing_v = 1
-
-
-
 
 comp = np.zeros(np.shape(main_image))
 size_const2 = (main_image.shape[0]/klim_v**1.5,main_image.shape[1]/klim_v**1.5)
@@ -130,7 +119,6 @@ while (size_const1 < size_const2):
     compshow = np.sign(comp) * (np.abs(comp)) **(0.01+1/gamma_v2)
     i += 1
     
-
 pr.disable()
 s = io.StringIO()
 ps = pstats.Stats(pr, stream=s).sort_stats('tottime')
@@ -138,3 +126,4 @@ ps.print_stats()
 
 with open('test.txt', 'w+') as f:
     f.write(s.getvalue())
+# end file
