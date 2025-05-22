@@ -156,14 +156,24 @@ def update(val): # responsible for the gui: updating the image based on slider v
 main_image = np.array(Image.open('TestImage1.jpg')) # Load image from disk
 main_image = main_image / 255 # Normalize pixel values to [0, 1] range
 # Downscale the image to reduce computation (zoom by 40%)
+# This reduces resolution to speed up FFT operations
 main_image = ndimage.zoom(main_image, (.4, .4, 1), order=0)
 
+
+# Compute luminance image (used for brightness-based masking)
+# Uses standard NTSC coefficients for estimating brightness from RGB
+# 3 channels to match main_image
 lum = (0.299*main_image[:,:,0] + 0.587*main_image[:,:,0]  + 0.114*main_image[:,:,0] )
-lum = np.stack([lum]*3, axis=-1)
+lum = np.stack([lum]*3, axis=-1) # Duplicate to RGB format for consistency
+
+# Load the bloom kernel image (user-defined shape)
 kernel_image_full = np.array(Image.open('kernel7.jpg'))
-plt.style.use('dark_background')
+plt.style.use('dark_background') # Set dark background theme for plotting
+
+# Create a figure with 3 side-by-side axes:
+# ax1 = mask preview, ax2 = original kernel, ax3 = final output
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 6))
-plt.subplots_adjust(bottom=0.50)
+plt.subplots_adjust(bottom=0.50) # Leave space for sliders below the plots
 ax2.set_title('Move sliders to run (might take awhile)')
 
 
