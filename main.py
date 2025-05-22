@@ -177,30 +177,33 @@ plt.subplots_adjust(bottom=0.50) # Leave space for sliders below the plots
 ax2.set_title('Move sliders to run (might take awhile)')
 
 
+# Set up sliders for interactive control of bloom effect parameters
+# Each slider is linked to a specific parameter in the bloom effect
 axTint = plt.axes([0.25, 0.3, 0.65, 0.03]) 
-scaletint_slider = Slider(axTint, 'Tint', 0, 1, valinit=0.95, valstep=0.01)
+scaletint_slider = Slider(axTint, 'Tint', 0, 1, valinit=0.95, valstep=0.01) # Overall strength of color tint
 
 axthres = plt.axes([0.25, 0.25, 0.65, 0.03]) 
-thres_slider = Slider(axthres, 'Threshold', 0.0, 1, valinit=0.95, valstep=0.01)
+thres_slider = Slider(axthres, 'Threshold', 0.0, 1, valinit=0.95, valstep=0.01) # Brightness threshold for masking
 
 axgamma = plt.axes([0.25, 0.2, 0.65, 0.03]) 
-gamma_slider = Slider(axgamma, 'Gamma Mask', 0, 20, valinit=3, valstep=0.1)
+gamma_slider = Slider(axgamma, 'Gamma Mask', 0, 20, valinit=3, valstep=0.1) # Gamma for the mask
 
 axgamma2 = plt.axes([0.25, 0.35, 0.65, 0.03]) 
-gamma_slider2 = Slider(axgamma2, 'Gamma Image', 0, 20, valinit=1, valstep=0.1)
+gamma_slider2 = Slider(axgamma2, 'Gamma Image', 0, 20, valinit=1, valstep=0.1) # Gamma applied to the image itself before convolution
 
 axSpacing = plt.axes([0.25, 0.4, 0.65, 0.03]) 
-Spacing_slider = Slider(axSpacing, 'Kernel scaling', 0.5, 4, valinit=20, valstep=0.1)
+Spacing_slider = Slider(axSpacing, 'Kernel scaling', 0.5, 4, valinit=20, valstep=0.1) # Kernel scale spacing multiplier
 
 axrot= plt.axes([0.25, 0.15, 0.65, 0.03]) 
-rot_slider = Slider(axrot, 'Rotation', 0, 20, valinit=0, valstep=0.1)
+rot_slider = Slider(axrot, 'Rotation', 0, 20, valinit=0, valstep=0.1) # Rotation multiplier for kernel
 
 axdecay = plt.axes([0.25, 0.1, 0.65, 0.03]) 
-decay_slider = Slider(axdecay, 'Scale->Bright', 0, 20, valinit=1, valstep=0.1)
+decay_slider = Slider(axdecay, 'Scale->Bright', 0, 20, valinit=1, valstep=0.1) # Controls how much each kernel scale contributes
 
 axKernel_limit= plt.axes([0.25, 0.05, 0.65, 0.03]) 
-kernel_lim_slider = Slider(axKernel_limit, 'Kernel size limit', 2, 15, valinit=2, valstep=0.1)
+kernel_lim_slider = Slider(axKernel_limit, 'Kernel size limit', 2, 15, valinit=2, valstep=0.1) # Upper limit on kernel size
 
+# Apply updates to sliders
 Spacing_slider.on_changed(update)
 scaletint_slider.on_changed(update)
 thres_slider.on_changed(update)
@@ -210,4 +213,4 @@ rot_slider.on_changed(update)
 decay_slider.on_changed(update)
 kernel_lim_slider.on_changed(update)
 
-plt.show()
+plt.show() # show the gui
